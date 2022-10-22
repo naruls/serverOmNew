@@ -12,7 +12,7 @@ const app = express();
 const client = new pg.Client({
     user: 'postgres',
     host: '172.16.117.193',
-    database: 'postgres',
+    database: 'machine_learning_mag',
     password: 'avalanche460',
     port: 5632,
 });
