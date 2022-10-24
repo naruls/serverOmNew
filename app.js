@@ -82,7 +82,7 @@ function allFetch(){
   }
 }
 //Функция, реализующая сбор данных с заданным интервалом
-let timerId = setInterval(() => allFetch(), 60000);
+let timerId = setInterval(() => allFetch(), 3600000);
 
 //Использование порта для работы сервера
 app.listen(PORT, () => {
