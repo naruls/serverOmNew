@@ -77,8 +77,9 @@ function fetchDataOpenmeteo(link, requestedHour){
 
 function allFetch(){
   var newTime = new Date().getHours();
+  newTime = newTime + 3;
   for(let i = newTime; i <= newTime+23; i++){
-    let timeStep = setTimeout(() => fetchDataOpenmeteo(apiLink, i), i*100);
+    let timeStep = setTimeout(() => fetchDataOpenmeteo(apiLink, i), i*500);
   }
 }
 //Функция, реализующая сбор данных с заданным интервалом
