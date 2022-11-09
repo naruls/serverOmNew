@@ -31,7 +31,7 @@ const apiLink =
 app.use(express.json());
 
 //Функция сбора данных по аргументу link
-function fetchDataOpenmeteo(link, requestedHour){
+function dataRecording(link, requestedHour){
   //fetch функция по аргументу link
   fetch(link)
     //Представление ответа в json формат
@@ -75,15 +75,17 @@ function fetchDataOpenmeteo(link, requestedHour){
 
 }
 
-function allFetch(){
+//Сбор данных за 24 часа начиная с текущего часа
+function fetchDataOpenMeteo(){
   var newTime = new Date().getHours();
   newTime = newTime + 3;
   for(let i = newTime; i <= newTime+23; i++){
-    let timeStep = setTimeout(() => fetchDataOpenmeteo(apiLink, i), i*500);
+    let timeStep = setTimeout(() => dataRecording(apiLink, i), i*400);
+    console.log('запись')
   }
 }
 //Функция, реализующая сбор данных с заданным интервалом
-let timerId = setInterval(() => allFetch(), 3600000);
+let timerId = setInterval(() => fetchDataOpenMeteo(), 3600000);
 
 //Использование порта для работы сервера
 app.listen(PORT, () => {
