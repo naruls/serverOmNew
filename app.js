@@ -5,10 +5,23 @@ import fetch from 'node-fetch';
 import momentZone from 'moment-timezone';
 import fs from 'fs';
 
+let newTime;
+
+const query = `
+  INSERT INTO data_for_ml_from_open_meteo (time, temperature_2m, relativehumidity_2m, dewpoint_2m, apparent_temperature,
+  precipitation, rain_and_showers, snowfall, pressure_msl, surface_pressure,
+  cloudcover, cloudcover_low, cloudcover_mid, cloudcover_high, et0_fao_evapotranspiration,
+  vapor_pressure_deficit, windspeed_10m, windspeed_80m,
+  winddirection_10m, winddirection_80m, windgusts_10m,
+  soil_temperature_0_7cm,
+  soil_moisture_0_9cm, soil_moisture_9_27cm)
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24) returning *
+`;
+
 //Создание объекта сервера
 const app = express();
 
-//Присвоение необходимых для подключения к бд конфигураций
+// Присвоение необходимых для подключения к бд конфигураций
 const client = new pg.Client({
     user: 'postgres',
     host: '172.16.117.193',
@@ -17,7 +30,7 @@ const client = new pg.Client({
     port: 5632,
 });
 
-// //Подключение клиента бд
+//Подключение клиента бд
 client.connect();
 
 //Присваивание порта прослушивания
@@ -38,16 +51,6 @@ function dataRecording(link, requestedHour){
     .then(res => res.json())
     .then(json => {
           console.log(requestedHour)
-            const query = `
-              INSERT INTO data_for_ml_from_open_meteo (time, temperature_2m, relativehumidity_2m, dewpoint_2m, apparent_temperature,
-              precipitation, rain_and_showers, snowfall, pressure_msl, surface_pressure,
-              cloudcover, cloudcover_low, cloudcover_mid, cloudcover_high, et0_fao_evapotranspiration,
-              vapor_pressure_deficit, windspeed_10m, windspeed_80m,
-              winddirection_10m, winddirection_80m, windgusts_10m,
-              soil_temperature_0_7cm,
-              soil_moisture_0_9cm, soil_moisture_9_27cm)
-              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24) returning *
-            `;
 
             client.query(query, [json.hourly.time[requestedHour], json.hourly.temperature_2m[requestedHour], json.hourly.relativehumidity_2m[requestedHour],
              json.hourly.dewpoint_2m[requestedHour], json.hourly.apparent_temperature[requestedHour], json.hourly.precipitation[requestedHour],
@@ -65,24 +68,22 @@ function dataRecording(link, requestedHour){
                 console.error(err);
                 return;
               }
-              console.log('Data insert successful');
             });
 
       })
       .catch(err =>{
 
       })
-
 }
 
 //Сбор данных за 24 часа начиная с текущего часа
 function fetchDataOpenMeteo(){
-  var newTime = new Date().getHours();
+  newTime = new Date().getHours();
   newTime = newTime + 3;
   for(let i = newTime; i <= newTime+23; i++){
     let timeStep = setTimeout(() => dataRecording(apiLink, i), i*400);
-    console.log('запись')
   }
+  newTime = 0;
 }
 //Функция, реализующая сбор данных с заданным интервалом
 let timerId = setInterval(() => fetchDataOpenMeteo(), 3600000);
@@ -91,3 +92,4 @@ let timerId = setInterval(() => fetchDataOpenMeteo(), 3600000);
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
 });
+
